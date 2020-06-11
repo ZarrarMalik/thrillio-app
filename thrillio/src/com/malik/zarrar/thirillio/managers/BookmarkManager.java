@@ -1,5 +1,7 @@
 package com.malik.zarrar.thirillio.managers;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.security.PublicKey;
 
 import com.malik.zarrar.thrillio.dao.BookmarkDao;
@@ -9,6 +11,8 @@ import com.malik.zarrar.thrillio.entities.Movie;
 import com.malik.zarrar.thrillio.entities.User;
 import com.malik.zarrar.thrillio.entities.UserBookmark;
 import com.malik.zarrar.thrillio.entities.WebLink;
+import com.malik.zarrar.thrillio.util.HttpConnect;
+import com.malik.zarrar.thrillio.util.IOUtil;
 
 public class BookmarkManager {
 
@@ -74,6 +78,25 @@ public class BookmarkManager {
 		userBookmark.setUser(user);
 		userBookmark.setBookmark(bookmark);
 
+		if (bookmark instanceof WebLink) {
+			try {				
+				String url = ((WebLink)bookmark).getUrl();
+				if (!url.endsWith(".pdf")) {
+					String webpage = HttpConnect.download(((WebLink)bookmark).getUrl());
+					if (webpage != null) {
+						IOUtil.write(webpage, bookmark.getId());
+					}
+				}				
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		
 		dao.saveUserBookmark(userBookmark);
 	}
 
